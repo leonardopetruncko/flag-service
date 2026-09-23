@@ -104,3 +104,12 @@ curl -X PUT http://localhost:8002/flags/enable-new-dashboard \
 -d '{"is_enabled": false}'
 ```
 Saída esperada: (O JSON da flag atualizada, com `"is_enabled": false`).
+
+## Arquitetura (Tech Challenge Fase 4)
+
+![Arquitetura da Fase 4](https://raw.githubusercontent.com/leonardopetruncko/toogle-master-gitops/main/docs/arquitetura/arquitetura-fase4.png)
+
+Este serviço CRUD das feature flags. Instrumentado com OpenTelemetry (Flask, requests e psycopg2); cada chamada ao auth-service continua o mesmo trace.
+
+- Observabilidade e deploy (GitOps): https://github.com/leonardopetruncko/toogle-master-gitops
+- Melhorias e correções da fase: https://github.com/leonardopetruncko/toogle-master-gitops/blob/main/docs/melhorias-fase4.md
