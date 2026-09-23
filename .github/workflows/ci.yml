@@ -6,7 +6,7 @@ on:
   push:
     branches: [main, master, dev]
   # Permite rebuildar a imagem a cada sessão do AWS Academy (o destroy apaga o ECR):
-  #   gh workflow run ci.yml -R drop0rz/<serviço>
+  #   gh workflow run ci.yml -R leonardopetruncko/<serviço>
   workflow_dispatch:
 
 concurrency:
@@ -16,14 +16,14 @@ concurrency:
 jobs:
   quality:
     name: Build & Unit Test + Lint
-    uses: drop0rz/reusable-workflows/.github/workflows/python-quality.yml@main
+    uses: leonardopetruncko/reusable-workflows/.github/workflows/python-quality.yml@main
     with:
       python-version: '3.11'
 
   security:
     name: DevSecOps - SAST & SCA
     needs: quality
-    uses: drop0rz/reusable-workflows/.github/workflows/security-python.yml@main
+    uses: leonardopetruncko/reusable-workflows/.github/workflows/security-python.yml@main
     with:
       python-version: '3.11'
       trivy-severity: 'CRITICAL'
@@ -32,7 +32,7 @@ jobs:
     name: Docker Build, Scan & Push
     needs: security
     if: github.event_name != 'pull_request'
-    uses: drop0rz/reusable-workflows/.github/workflows/docker-build-push.yml@main
+    uses: leonardopetruncko/reusable-workflows/.github/workflows/docker-build-push.yml@main
     with:
       dockerfile-path: 'Dockerfile.flag'
       image-name: 'flag-service'
@@ -47,9 +47,9 @@ jobs:
     name: Atualiza tag no repo GitOps
     needs: docker
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    uses: drop0rz/reusable-workflows/.github/workflows/update-gitops.yml@main
+    uses: leonardopetruncko/reusable-workflows/.github/workflows/update-gitops.yml@main
     with:
-      gitops-repo: 'drop0rz/toogle-master-gitops'
+      gitops-repo: 'leonardopetruncko/toogle-master-gitops'
       service-name: 'flag-service'
       image-uri: ${{ needs.docker.outputs.image-uri }}
       manifest-path: 'apps/flag-service/deployment.yaml'
