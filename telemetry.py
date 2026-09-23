@@ -29,7 +29,6 @@ def setup_telemetry(flask_app=None, psycopg2=False, botocore=False):
     from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
     from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
     from opentelemetry.instrumentation.logging import LoggingInstrumentor
-    from opentelemetry.instrumentation.requests import RequestsInstrumentor
     from opentelemetry.sdk.metrics import MeterProvider
     from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
     from opentelemetry.sdk.resources import Resource
@@ -47,7 +46,13 @@ def setup_telemetry(flask_app=None, psycopg2=False, botocore=False):
     metrics.set_meter_provider(MeterProvider(resource=resource, metric_readers=[reader]))
 
     # Chamadas HTTP de saída (ex.: /validate no auth-service) levam o traceparent.
-    RequestsInstrumentor().instrument()
+    # O analytics-service não usa a lib requests, por isso a instrumentação é opcional.
+    try:
+        from opentelemetry.instrumentation.requests import RequestsInstrumentor
+
+        RequestsInstrumentor().instrument()
+    except ImportError:
+        log.info("Lib 'requests' ausente: instrumentação HTTP de saída desativada.")
 
     if flask_app is not None:
         from opentelemetry.instrumentation.flask import FlaskInstrumentor
