@@ -72,7 +72,10 @@ def setup_telemetry(flask_app=None, psycopg2=False, botocore=False):
 
     # Coloca trace_id/span_id em cada linha de log: no Grafana dá para ir do log (Loki)
     # direto ao trace (Datadog) pelo mesmo ID.
-    LoggingInstrumentor().instrument()
+    # A partir da 0.6x, o instrumentor só injeta os IDs com inject_trace_context=True.
+    # Os logs saem pelo stdout (coletados pelo filelog do Collector), então o handler
+    # OTLP de logs fica desligado para não duplicar.
+    LoggingInstrumentor().instrument(inject_trace_context=True, enable_log_auto_instrumentation=False)
     # Os defaults cobrem logs criados antes da instrumentação (sem trace ativo).
     formatter = logging.Formatter(LOG_FORMAT, defaults={"otelTraceID": "0", "otelSpanID": "0"})
     for handler in logging.getLogger().handlers:
